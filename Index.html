@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Igreja Dorme</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+<body class="bg-black text-gray-200 min-h-screen flex flex-col items-center justify-center p-4 select-none">
+
+    <div id="app" class="w-full max-w-md text-center bg-zinc-950 p-6 rounded-2xl border border-zinc-900 shadow-2xl">
+        
+        <!-- ======================================================= -->
+        <!-- TELA 1: SELEÇÃO DE JOGADORES E CARGOS                   -->
+        <!-- ======================================================= -->
+        <div id="tela-setup" class="space-y-6">
+            <h1 class="text-2xl font-black tracking-widest text-red-600">IGREJA DORME</h1>
+            
+            <!-- Adicionar Jogador -->
+            <div class="text-left space-y-2">
+                <label class="text-sm font-bold text-zinc-400 uppercase tracking-wider block">Adicionar Irmãos (Mín. 5)</label>
+                <div class="flex gap-2">
+                    <input id="input-nome" type="text" placeholder="Nome do irmão/irmã..." class="flex-1 bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-red-900">
+                    <button id="btn-add" class="bg-red-900 active:bg-red-950 px-4 rounded-xl font-bold text-white">+</button>
+                </div>
+                <!-- Lista de nomes adicionados -->
+                <div id="lista-nomes" class="flex flex-wrap gap-2 pt-2 max-h-32 overflow-y-auto">
+                    <!-- Nomes vão aparecer aqui via JS -->
+                </div>
+            </div>
+
+            <hr class="border-zinc-900">
+
+            <!-- Lista de Cargos Disponíveis -->
+            <div class="text-left space-y-3">
+                <div class="flex justify-between items-center">
+                    <label class="text-sm font-bold text-zinc-400 uppercase tracking-wider">Cargos na Partida</label>
+                    <span id="contador-cargos" class="text-xs bg-zinc-900 text-zinc-400 px-2 py-1 rounded-md font-mono">0 selecionados</span>
+                </div>
+                
+                <div class="space-y-2 max-h-90 overflow-y-auto pr-1">
+                    <!-- Card do Cargo -->
+                    <div class="bg-zinc-900 border border-zinc-800 p-3 rounded-xl flex justify-between items-center">
+                        <div>
+                            <p class="font-bold text-white">😈 Membro Desviado</p>
+                            <p class="text-xs text-zinc-500">Tenta corromper a igreja à noite.</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="alterarQtdCargo('desviado', -1)" class="w-8 h-8 bg-zinc-800 rounded-lg font-bold text-center">-</button>
+                            <span id="qtd-desviado" class="font-mono font-bold text-red-500">0</span>
+                            <button onclick="alterarQtdCargo('desviado', 1)" class="w-8 h-8 bg-zinc-800 rounded-lg font-bold text-center">+</button>
+                        </div>
+                    </div>
+
+                    <!-- Card Rose -->
+                    <div class="bg-zinc-900 border border-zinc-800 p-3 rounded-xl flex justify-between items-center">
+                        <div>
+                            <p class="font-bold text-white">👁️ Rose</p>
+                            <p class="text-xs text-zinc-500">Investiga quem é desviado à noite.</p>
+                        </div>
+                        <input type="checkbox" id="chk-rose" class="w-5 h-5 accent-red-600" checked>
+                    </div>
+
+                    <!-- Card Marli -->
+                    <div class="bg-zinc-900 border border-zinc-800 p-3 rounded-xl flex justify-between items-center">
+                        <div>
+                            <p class="font-bold text-white">👵 Marli</p>
+                            <p class="text-xs text-zinc-500">Assume a investigação uma rodada depois da a Rose sair.</p>
+                        </div>
+                        <input type="checkbox" id="chk-marli" class="w-5 h-5 accent-red-600" checked>
+                    </div>
+
+                    <!-- Card Intercessor -->
+                        <div class="bg-zinc-900 border border-zinc-800 p-3 rounded-xl flex justify-between items-center">
+                        <div>
+                            <p class="font-bold text-white">🙏 Intercessor</p>
+                            <p class="text-xs text-zinc-500">Protege um irmão com oração à noite.</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="alterarQtdCargo('intercessor', -1)" class="w-8 h-8 bg-zinc-800 rounded-lg font-bold text-center">-</button>
+                            <span id="qtd-intercessor" class="font-mono font-bold text-blue-400">0</span>
+                            <button onclick="alterarQtdCargo('intercessor', 1)" class="w-8 h-8 bg-zinc-800 rounded-lg font-bold text-center">+</button>
+                        </div>
+</div>
+                    </div>
+                </div>
+                <!-- Seletor de modo -->
+                            <div class="text-left space-y-2 mb-4">
+                <label class="text-sm font-bold text-zinc-400 uppercase tracking-wider block">Formato da Partida</label>
+                <div class="grid grid-cols-2 gap-2 bg-zinc-900 p-1 rounded-xl border border-zinc-800">
+                    <button id="mode-narrador" onclick="mudarModoJogo('NARRADOR')" type="button" class="py-2.5 rounded-lg font-bold text-sm bg-red-900 text-white transition-all cursor-pointer">
+                        🎙️ Com Narrador
+                    </button>
+                    <button id="mode-todos" onclick="mudarModoJogo('TODOS')" type="button" class="py-2.5 rounded-lg font-bold text-sm text-zinc-400 hover:text-white transition-all cursor-pointer">
+                        👥 Sem Narrador
+                    </button>
+                </div>
+            </div>
+
+                 <!-- Botão Iniciar -->
+                    <button id="btn-iniciar" class="w-full bg-zinc-800 text-zinc-500 font-bold py-4 rounded-xl text-lg cursor-not-allowed" disabled>
+                        NÚMERO DE JOGADORES NÃO BATE
+                    </button>
+        </div>
+            </div>
+
+           
+
+        <!-- ======================================================= -->
+        <!-- TELA 2: REVELAÇÃO DE PAPÉIS (A que fizemos antes)        -->
+        <!-- ======================================================= -->
+        <div id="tela-revelar" class="space-y-6 hidden">
+            <h1 class="text-xl font-bold tracking-wider text-zinc-500 uppercase">DISTRIBUIÇÃO DE PAPÉIS</h1>
+            <p class="text-xl">Passar o celular para:<br>
+                <span id="nome-jogador-atual" class="text-3xl font-black text-white block mt-2">---</span>
+            </p>
+            
+            <div id="caixa-papel" class="bg-zinc-900 border-2 border-dashed border-zinc-800 rounded-2xl p-8 my-8 min-h-[120px] flex items-center justify-center">
+                <p id="texto-papel" class="text-lg text-zinc-500 italic">Mantenha o botão pressionado para ver seu papel</p>
+            </div>
+
+            <button id="btn-revelar" class="w-full bg-zinc-900 active:bg-red-950 text-white font-bold py-6 px-4 rounded-xl text-lg border border-zinc-800 touch-none select-none">
+                SEGURE PARA REVELAR
+            </button>
+
+            <button 
+                    id="btn-proximo" 
+                    class="w-full bg-zinc-900 text-zinc-600 font-bold py-4 rounded-xl text-lg transition-colors cursor-not-allowed block border border-zinc-800" 
+                    disabled
+                >
+                    ENTENDI, PRÓXIMO JOGADOR →
+            </button>
+        </div>
+
+        <!-- ======================================================= -->
+        <!-- TELA 3: Tela do narrador       -->
+        <!-- ======================================================= -->
+        <div id="tela-narrador" class="space-y-6 hidden text-left">
+            <div class="flex justify-between items-center border-b border-zinc-900 pb-4">
+                <h1 class="text-xl font-black tracking-widest text-red-600">PAINEL DO NARRADOR</h1>
+                <span id="contador-vivos" class="text-xs bg-zinc-900 text-zinc-400 px-2 py-1 rounded-md font-mono">0 Vivos</span>
+            </div>
+
+            <div id="alerta-marli" class="bg-blue-950/40 border border-blue-900/50 text-blue-400 p-3 rounded-xl text-sm hidden font-bold text-center animate-pulse">
+                👵 A Marli assumiu a investigação!
+            </div>
+
+            <div id="tabela-narrador" class="space-y-2">
+                </div>
+
+            <button onclick="reiniciarPartida()" class="w-full bg-zinc-900 hover:bg-zinc-800 text-zinc-400 font-bold py-3 rounded-xl text-sm transition-colors mt-6 text-center block border border-zinc-800 cursor-pointer">
+            🔄 Jogar Novamente com Mesmos Nomes
+            </button>
+        </div>
+
+    </div>
+
+    <!-- ======================================================= -->
+    <!-- LÓGICA EM JAVASCRIPT                                    -->
+    <!-- ======================================================= -->
+    <script>
+        // Dados do Jogo (O "Estado" do App)
+        let listaJogadores = [];
+        let cargosConfig = { desviado: 0, rose: true, marli: true, intercessor: 0 };
+        let deckPapeisSorteados = [];
+        let indiceJogadorAtual = 0;
+        let modoJogo = "NARRADOR";
+        let passouPelaRevelacao = false;
+
+        // Elementos da Tela 1
+        const inputNome = document.getElementById('input-nome');
+        const btnAdd = document.getElementById('btn-add');
+        const divListaNomes = document.getElementById('lista-nomes');
+        const txtContadorCargos = document.getElementById('contador-cargos');
+        const btnIniciar = document.getElementById('btn-iniciar');
+
+        // Elementos da Tela 2
+        const telaSetup = document.getElementById('tela-setup');
+        const telaRevelar = document.getElementById('tela-revelar');
+        const txtNomeJogadorAtual = document.getElementById('nome-jogador-atual');
+        const btnRevelar = document.getElementById('btn-revelar');
+        const textoPapel = document.getElementById('texto-papel');
+        const caixaPapel = document.getElementById('caixa-papel');
+        const btnProximo = document.getElementById('btn-proximo');
+
+          
+
+        // Modo de jogo:
+        window.mudarModoJogo = function(modo) {
+        modoJogo = modo;
+        const btnNarrador = document.getElementById('mode-narrador');
+        const btnTodos = document.getElementById('mode-todos');
+        
+        if(modo === "NARRADOR") {
+            btnNarrador.className = "py-2.5 rounded-lg font-bold text-sm bg-red-900 text-white transition-all cursor-pointer";
+            btnTodos.className = "py-2.5 rounded-lg font-bold text-sm text-zinc-400 hover:text-white transition-all cursor-pointer";
+        } else {
+            btnTodos.className = "py-2.5 rounded-lg font-bold text-sm bg-red-900 text-white transition-all cursor-pointer";
+            btnNarrador.className = "py-2.5 rounded-lg font-bold text-sm text-zinc-400 hover:text-white transition-all cursor-pointer";
+        }
+        }
+
+        // --- APRENDENDO A PROGRAMAR: AS FUNÇÕES DO JOGO ---
+
+        // Função para Adicionar Jogador na Lista
+        btnAdd.addEventListener('click', () => {
+            const nome = inputNome.value.trim();
+            if(nome === "") return;
+            
+            listaJogadores.push(nome);
+            inputNome.value = ""; // Limpa o campo
+            renderizarNomes();
+            validarJogo();
+        });
+
+        function renderizarNomes() {
+            divListaNomes.innerHTML = ""; // Limpa a lista visual
+            listaJogadores.forEach((nome, index) => {
+                divListaNomes.innerHTML += `
+                    <span class="bg-zinc-900 border border-zinc-800 text-white px-3 py-1 rounded-full text-sm flex items-center gap-2">
+                        ${nome}
+                        <button onclick="removerJogador(${index})" class="text-red-500 font-bold">×</button>
+                    </span>
+                `;
+            });
+        }
+
+        window.removerJogador = function(index) {
+            listaJogadores.splice(index, 1);
+            renderizarNomes();
+            validarJogo();
+        }
+
+        // Função para os botões de + e - do Desviado
+            window.alterarQtdCargo = function(cargo, valor) {
+                // Garantimos que o valor atual seja tratado como número usando Number()
+                let qtdAtual = Number(cargosConfig[cargo]) || 0;
+                
+                // Calcula o novo valor impedindo que fique menor que zero
+                cargosConfig[cargo] = Math.max(0, qtdAtual + valor);
+                
+                // Atualiza o texto na tela
+                document.getElementById(`qtd-${cargo}`).textContent = cargosConfig[cargo];
+                
+                // Roda a validação para atualizar o botão principal
+                validarJogo();
+
+                
+                }
+        
+
+        // Escuta apenas os checkboxes que sobraram
+            const cargosCheckbox = ['rose', 'marli'];
+            cargosCheckbox.forEach(cargo => {
+                const elemento = document.getElementById(`chk-${cargo}`);
+                if (elemento) {
+                    elemento.addEventListener('change', (e) => {
+                        cargosConfig[cargo] = e.target.checked;
+                        validarJogo();
+                    });
+                }
+            });
+
+        // Validação: O número de cargos selecionados tem que bater com o número de jogadores!
+        function validarJogo() {
+            // Conta quantos cargos especiais foram ativados
+            let totalCargosEspeciais = cargosConfig.desviado + cargosConfig.intercessor + (cargosConfig.rose ? 1 : 0);
+            
+            let totalJogadores = listaJogadores.length;
+            txtContadorCargos.textContent = `${totalCargosEspeciais} cargos definidos`;
+
+            // Se tivermos mais jogadores que cargos especiais, o resto vira "Membro Comum" automaticamente
+            if (totalJogadores >= 4 && totalCargosEspeciais <= totalJogadores && cargosConfig.desviado > 0) {
+                btnIniciar.removeAttribute('disabled');
+                btnIniciar.className = "w-full bg-red-600 hover:bg-red-700 text-white font-bold py-4 rounded-xl text-lg transition-colors cursor-pointer";
+                btnIniciar.textContent = `INICIAR COM ${totalJogadores} IRMÃOS`;
+            } else {
+                btnIniciar.setAttribute('disabled', 'true');
+                btnIniciar.className = "w-full bg-zinc-900 text-zinc-600 font-bold py-4 rounded-xl text-lg cursor-not-allowed";
+                btnIniciar.textContent = "A CONTA DE JOGADORES NÃO BATE";
+            }
+        }
+
+            // --- BOTÃO INICIAR JOGO: O SORTEIO DOS PAPÉIS ---
+            btnIniciar.addEventListener('click', () => {
+            deckPapeisSorteados = [];
+        
+            // 1. Adiciona Desviados
+            for(let i = 0; i < cargosConfig.desviado; i++) {
+                deckPapeisSorteados.push("Membro Desviado 😈");
+            }
+            
+            // 2. Adiciona os especiais (Checkboxes)
+            if(cargosConfig.rose) deckPapeisSorteados.push("Rose 👁️");
+            
+            // 3. Adiciona Intercessores (Contador)
+            for(let i = 0; i < cargosConfig.intercessor; i++) {
+                deckPapeisSorteados.push("Intercessor 🙏");
+            }
+            
+            // 4. Completa o resto com Membros normais
+            while(deckPapeisSorteados.length < listaJogadores.length) {
+                deckPapeisSorteados.push("Membro Comum ⛪");
+            }
+
+            // 5. Embaralha (Algoritmo de Fisher-Yates)
+            for (let i = deckPapeisSorteados.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [deckPapeisSorteados[i], deckPapeisSorteados[j]] = [deckPapeisSorteados[j], deckPapeisSorteados[i]];
+            }
+
+            // 6. Transição de telas
+            telaSetup.classList.add('hidden');
+            telaRevelar.classList.remove('hidden');
+            
+            indiceJogadorAtual = 0;
+            atualizarTurnoRevelacao();
+        });
+
+        function atualizarTurnoRevelacao() {
+            txtNomeJogadorAtual.textContent = listaJogadores[indiceJogadorAtual];
+            esconderPapel();
+            btnRevelar.classList.remove('hidden'); 
+            
+            // Reseta a trava para o novo jogador
+            passouPelaRevelacao = false;
+            btnProximo.setAttribute('disabled', 'true');
+            btnProximo.className = "w-full bg-zinc-900 text-zinc-600 font-bold py-4 rounded-xl text-lg transition-colors cursor-not-allowed block border border-zinc-800";
+            }
+
+        function mostrarPapel() {
+            const papel = deckPapeisSorteados[indiceJogadorAtual];
+            textoPapel.textContent = papel;
+            
+            // Se for desviado fica vermelho, se for comum fica verde, se for especial fica azul
+            if(papel.includes("Desviado")) {
+                textoPapel.className = "text-2xl font-black text-red-500 uppercase tracking-wider animate-pulse";
+                caixaPapel.className = "bg-zinc-900 border-2 border-red-900 rounded-2xl p-8 my-8 min-h-[120px] flex items-center justify-center";
+            } else if(papel.includes("Comum")) {
+                textoPapel.className = "text-2xl font-black text-green-500 uppercase tracking-wider";
+                caixaPapel.className = "bg-zinc-900 border-2 border-green-900 rounded-2xl p-8 my-8 min-h-[120px] flex items-center justify-center";
+            } else {
+                textoPapel.className = "text-2xl font-black text-blue-400 uppercase tracking-wider";
+                caixaPapel.className = "bg-zinc-900 border-2 border-blue-900 rounded-2xl p-8 my-8 min-h-[120px] flex items-center justify-center";
+            }
+        if (!passouPelaRevelacao) {
+        passouPelaRevelacao = true;
+        btnProximo.removeAttribute('disabled');
+        btnProximo.className = "w-full bg-red-600 hover:bg-red-700 active:bg-red-950 text-white font-bold py-4 rounded-xl text-lg transition-colors cursor-pointer block";
+        }
+        }
+
+        function esconderPapel() {
+            textoPapel.textContent = "Mantenha o botão pressionado para ver seu papel";
+            textoPapel.className = "text-sm text-zinc-500 italic";
+            caixaPapel.className = "bg-zinc-900 border-2 border-dashed border-zinc-800 rounded-2xl p-8 my-8 min-h-[120px] flex items-center justify-center";
+        }
+
+        // Eventos do botão de segurar
+            btnRevelar.addEventListener('mousedown', mostrarPapel);
+            btnRevelar.addEventListener('touchstart', (e) => { e.preventDefault(); mostrarPapel(); });
+            btnRevelar.addEventListener('mouseup', esconderPapel);
+            btnRevelar.addEventListener('mouseleave', esconderPapel);
+            btnRevelar.addEventListener('touchend', esconderPapel);
+
+        // Avançar para o Próximo irmão
+        btnProximo.addEventListener('click', () => {
+            indiceJogadorAtual++;
+            if(indiceJogadorAtual < listaJogadores.length) {
+                atualizarTurnoRevelacao();
+            } else {
+                irParaMesaNarrador();
+            }
+        });
+
+        // Variáveis de controle do Narrador
+    let dadosPartida = [];
+    let marliJaAtivada = false;
+
+    function irParaMesaNarrador() {
+        telaRevelar.classList.add('hidden');
+        document.getElementById('tela-narrador').classList.remove('hidden');
+
+        // 1. Cria a lista de objetos
+        dadosPartida = listaJogadores.map((nome, index) => {
+            return {
+                nome: nome,
+                papel: deckPapeisSorteados[index],
+                vivo: true
+            };
+        });
+
+        // 2. LOGICA NOVA: Ordena a lista por prioridade de cargo
+        dadosPartida.sort((a, b) => {
+            const obterPeso = (papel) => {
+                if (papel.includes("Desviado")) return 1;
+                if (papel.includes("Rose") || papel.includes("Marli")) return 2;
+                if (papel.includes("Intercessor")) return 3;
+                return 4; // Membro Comum
+            };
+            return obterPeso(a.papel) - obterPeso(b.papel);
+        });
+
+        renderizarMesaNarrador();
+    }
+
+    function renderizarMesaNarrador() {
+        const tabela = document.getElementById('tabela-narrador');
+        tabela.innerHTML = ""; 
+
+        let vivos = 0;
+
+        dadosPartida.forEach((jogador, index) => {
+            if(jogador.vivo) vivos++;
+
+            // Mantém o fundo visível (bg-zinc-900), muda apenas o visual interno do morto
+            const classeLinha = jogador.vivo 
+                ? "bg-zinc-900 border border-zinc-800 p-3 rounded-xl flex justify-between items-center transition-all" 
+                : "bg-zinc-900 border border-zinc-900/50 p-3 rounded-xl flex justify-between items-center transition-all";
+
+            const botaoEliminar = jogador.vivo
+                ? `<button onclick="eliminarJogador(${index})" class="bg-red-950/40 hover:bg-red-900 text-red-500 hover:text-white border border-red-900/30 text-xs font-bold px-3 py-1.5 rounded-lg transition-colors cursor-pointer">Eliminar</button>`
+                : `<span class="text-zinc-500 text-xs font-bold italic mr-2">Eliminado</span>`;
+
+            // Modifica as cores e aplica o riscado se estiver morto
+            const estiloNome = jogador.vivo ? "text-white font-bold" : "text-zinc-400 line-through font-medium opacity-60";
+            const estiloCargo = jogador.vivo ? "text-xs text-zinc-500" : "text-xs text-zinc-600 line-through opacity-50";
+
+            tabela.innerHTML += `
+                <div class="${classeLinha}">
+                    <div>
+                        <p class="${estiloNome}">${jogador.nome}</p>
+                        <p class="${estiloCargo}">${jogador.papel}</p>
+                    </div>
+                    <div>
+                        ${botaoEliminar}
+                    </div>
+                </div>
+            `;
+        });
+
+        document.getElementById('contador-vivos').textContent = `${vivos} Vivos`;
+    }
+
+    window.eliminarJogador = function(index) {
+        // Muda o status do jogador para morto
+        dadosPartida[index].vivo = false;
+
+        // REGRA DA MARLI: Se quem morreu foi a Rose, e a Marli está ativada na configuração
+        if (dadosPartida[index].papel.includes("Rose") && cargosConfig.marli && !marliJaAtivada) {
+            ativarMarliOculta();
+        }
+
+        // Recarrega a tela visualmente com as alterações
+        renderizarMesaNarrador();
+    }
+
+    function ativarMarliOculta() {
+         const membroComum = dadosPartida.find(j => j.vivo && j.papel.includes("Membro Comum"));
+        
+        if (membroComum) {
+            membroComum.papel = "Marli 👵 (Assumiu)";
+            marliJaAtivada = true;
+            // Mostra o alerta piscando na tela do narrador
+            document.getElementById('alerta-marli').classList.remove('hidden');
+        }
+    }
+
+        window.reiniciarPartida = function() {
+        // 1. Reseta as variáveis de estado do jogo, limpando o sorteio antigo
+        deckPapeisSorteados = [];
+        indiceJogadorAtual = 0;
+        dadosPartida = [];
+        marliJaAtivada = false;
+
+        // 2. Esconde o alerta da Marli (para caso ela tenha aparecido na última rodada)
+        document.getElementById('alerta-marli').classList.add('hidden');
+
+        // 3. Transição reversa de telas: esconde a mesa do narrador e acende a tela de setup
+        document.getElementById('tela-narrador').classList.add('hidden');
+        telaSetup.classList.remove('hidden');
+
+        // 4. Força o app a reavaliar os nomes que já estavam lá para acender o botão iniciar
+        validarJogo();
+        }
+
+
+    </script>
+</body>
+</html>
